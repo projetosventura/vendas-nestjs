@@ -18,27 +18,21 @@ export class UserService {
  private users: UserEntity[] = [];
 
   async createUser(createUserDto: createUserDto): Promise<UserEntity> {
+    console.log('Body recebido', createUserDto);
     const saltOrRounds = 10;
 
     const passwordHashed = await hash(
       createUserDto.password,
+      
       saltOrRounds,
     );
 
     return this.userRepository.save({
       ...createUserDto,
       password: passwordHashed,
+      type_user: 1
     });
 
-    const user: UserEntity = {
-      ...createUserDto,
-      id: this.users.length + 1,
-      password: passwordHashed,
-    };
-
-    this.users.push(user);
-
-    return user;
   }
 
   async getAllUsers(): Promise<UserEntity[]> {
