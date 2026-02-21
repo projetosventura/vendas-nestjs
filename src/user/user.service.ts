@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { ConflictException, Injectable, InternalServerErrorException, NotFoundException } from '@nestjs/common';
 import { hash } from 'bcrypt';
 import { createUserDto } from './dtos/create-user.dto';
 import { UserEntity } from './interfaces/user.entity';
@@ -11,22 +11,55 @@ export class UserService {
   ) {}
 
   async createUser(createUserDto: createUserDto): Promise<UserEntity> {
-    const passwordHashed = await hash(
-      createUserDto.password,
-      10,
-    );
+    try {
+      const passwordHashed = await hash(
+        createUserDto.password,
+        10,
+      );
 
-    return this.userRepository.create({
-      ...createUserDto,
-      password: passwordHashed,
-    });
+      return await this.userRepository.create({
+        ...createUserDto,
+        password: passwordHashed,
+      });
+    } catch (error) {
+      
+      if (error.code === '23505') {
+        throw new ConflictException('Email já cadastrado');
+      }
+
+      throw new InternalServerErrorException(
+        'Erro ao criar usuário',
+      );
+    }
   }
 
   async getAllUsers(): Promise<UserEntity[]> {
-    return this.userRepository.findAll();
+    try {
+      return await this.userRepository.findAll();
+    } catch (error) {
+      throw new InternalServerErrorException(
+        'Erro ao buscar usuários',
+      );
+    }
   }
 
   async findByEmail(email: string): Promise<UserEntity[]> {
-    return this.userRepository.findByEmail(email);
+    try {
+      const user = await this.userRepository.findByEmail(email);
+
+      if (!user) {
+        throw new NotFoundException('Usuário não encontrado');
+      }
+
+      return user;
+    } catch (error) {
+      if (error instanceof NotFoundException) {
+        throw error;
+      }
+
+      throw new InternalServerErrorException(
+        'Erro ao buscar usuário',
+      );
+    }
   }
 }
