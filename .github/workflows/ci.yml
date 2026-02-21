@@ -52,19 +52,25 @@ jobs:
       - name: Run lint
         run: npm run lint
 
-           # 🔐 GITLEAKS - Scan de secrets
+                 # 🔐 GITLEAKS - Scan de secrets
       - name: Run Gitleaks
+        id: gitleaks
         uses: gitleaks/gitleaks-action@v2
         with:
-          args: detect --report-format=sarif --report-path=gitleaks.sarif --redact --exit-code 1
+          args: detect --report-format=sarif --report-path=gitleaks.sarif --redact
+        continue-on-error: true
 
-      # 📤 Upload do relatório para aba Security do GitHub
+      # 📤 Upload do relatório se existir
       - name: Upload Gitleaks SARIF
-        if: always()
-        uses: github/codeql-action/upload-sarif@v3
+        if: always() && hashFiles('gitleaks.sarif') != ''
+        uses: github/codeql-action/upload-sarif@v4
         with:
           sarif_file: gitleaks.sarif
-          
+
+      # ❌ Falha pipeline se encontrou secrets
+      - name: Fail if secrets found
+        if: steps.gitleaks.outcome == 'failure'
+        run: exit 1
       # 🧪 TESTS COM COVERAGE
       - name: Run tests with coverage
         run: npm run test:cov
