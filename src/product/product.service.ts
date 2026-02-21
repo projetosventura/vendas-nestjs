@@ -1,9 +1,10 @@
-import {
-  Injectable,
-  InternalServerErrorException,
-  NotFoundException,
-  ConflictException,
-} from '@nestjs/common';
+
+
+import { ConflictException, Injectable, InternalServerErrorException, NotFoundException } from '@nestjs/common';
+import { ProductEntity } from '../product/interfaces/product.entity';
+import { ProductRepository } from '../product/repository/product.repository';
+import { CreateProductDto } from './dtos/product.dto';
+
 
 @Injectable()
 export class ProductService {
