@@ -1,16 +1,18 @@
 import { Module } from '@nestjs/common';
 import { UserModule } from './user/user.module';
+import { ProductModule} from './product/product.module';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 
 @Module({
   imports: [
-    // Carrega automaticamente o .env da raiz
+    
     ConfigModule.forRoot({
       isGlobal: true,
     }),
 
     UserModule,
+    ProductModule,
 
     TypeOrmModule.forRootAsync({
       inject: [ConfigService],
