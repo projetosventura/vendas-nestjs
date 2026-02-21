@@ -35,6 +35,8 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # necessário para Sonar analisar branches corretamente
 
       - name: Setup Node
         uses: actions/setup-node@v4
@@ -50,8 +52,22 @@ jobs:
       - name: Run lint
         run: npm run lint
 
-      - name: Run tests
-        run: npm run test
+      # 🔐 GITLEAKS - Scan de secrets
+      - name: Run Gitleaks
+        uses: gitleaks/gitleaks-action@v2
+        with:
+          args: detect --verbose --redact
+
+      # 🧪 TESTS COM COVERAGE
+      - name: Run tests with coverage
+        run: npm run test:cov
+
+      # ☁️ SONARCLOUD
+      - name: SonarCloud Scan
+        uses: SonarSource/sonarcloud-github-action@v2
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Build
         run: npm run build
