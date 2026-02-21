@@ -52,12 +52,19 @@ jobs:
       - name: Run lint
         run: npm run lint
 
-      # 🔐 GITLEAKS - Scan de secrets
+           # 🔐 GITLEAKS - Scan de secrets
       - name: Run Gitleaks
         uses: gitleaks/gitleaks-action@v2
         with:
-          args: detect --verbose --redact
+          args: detect --report-format=sarif --report-path=gitleaks.sarif --redact --exit-code 1
 
+      # 📤 Upload do relatório para aba Security do GitHub
+      - name: Upload Gitleaks SARIF
+        if: always()
+        uses: github/codeql-action/upload-sarif@v3
+        with:
+          sarif_file: gitleaks.sarif
+          
       # 🧪 TESTS COM COVERAGE
       - name: Run tests with coverage
         run: npm run test:cov
