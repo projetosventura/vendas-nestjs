@@ -4,7 +4,7 @@ import { Injectable } from '@nestjs/common';
 import { ProductEntity } from '../product/interfaces/product.entity';
 import { ProductRepository } from '../product/repository/product.repository';
 import { CreateProductDto } from './dtos/product.dto';
-import { UserEntity } from '../user/interfaces/user.entity';
+
 
 
 @Injectable()
